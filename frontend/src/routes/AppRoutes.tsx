@@ -4,6 +4,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import ProtectedRoute from '../components/ProtectedRoute';
 import HomePage from '../pages/public/HomePage';
 import SchedulePage from '../pages/public/SchedulePage';
+import ResultsPage from '../pages/public/ResultsPage';
 import TeamsPage from '../pages/public/TeamsPage';
 import TeamDetailPage from '../pages/public/TeamDetailPage';
 import StandingsPage from '../pages/public/StandingsPage';
@@ -33,6 +34,7 @@ function AppRoutes() {
         <Route element={<MainLayout />}>
           <Route index element={<HomePage />} />
           <Route path="matches" element={<SchedulePage />} />
+          <Route path="results" element={<ResultsPage />} />
           <Route path="teams" element={<TeamsPage />} />
           <Route path="teams/:id" element={<TeamDetailPage />} />
           <Route path="standings" element={<StandingsPage />} />

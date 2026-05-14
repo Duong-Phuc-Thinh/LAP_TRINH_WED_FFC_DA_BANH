@@ -7,17 +7,27 @@ function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ fullName: '', email: '', phone: '', password: '' });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError('');
 
+    const validationError = validateRegister(form);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
+      setLoading(true);
       await register(form);
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Register failed');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -35,11 +45,20 @@ function RegisterPage() {
             />
           </label>
         ))}
-        <button type="submit">Create account</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Creating...' : 'Create account'}
+        </button>
         {error && <p className="form-error">{error}</p>}
       </form>
     </section>
   );
+}
+
+function validateRegister(form: { fullName: string; email: string; password: string }) {
+  if (!form.fullName.trim()) return 'Full name is required.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Email is invalid.';
+  if (form.password.length < 6) return 'Password must be at least 6 characters.';
+  return '';
 }
 
 export default RegisterPage;

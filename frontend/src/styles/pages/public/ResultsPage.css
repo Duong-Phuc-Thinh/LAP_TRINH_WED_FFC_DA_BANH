@@ -1,0 +1,13 @@
+.results-page {
+  animation: fadeUp 520ms ease both;
+}
+
+.result-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.result-card .score-label {
+  color: #fef08a;
+}

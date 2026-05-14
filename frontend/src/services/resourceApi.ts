@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import type { Match, StandingRow } from '../types';
+import type { Match, NewsItem, StandingRow } from '../types';
 
 export function listResource<T = any>(resource: string) {
   return apiClient.get<T[]>(`/${resource}`).then((res) => res.data);
@@ -25,6 +25,10 @@ export function getDashboardSummary() {
   return apiClient.get<Record<string, number>>('/dashboard/summary').then((res) => res.data);
 }
 
+export function listPublicNews() {
+  return apiClient.get<NewsItem[]>('/news/public').then((res) => res.data);
+}
+
 export function updateMatchResult(matchId: number | string, data: Record<string, unknown>) {
   return apiClient.patch(`/matches/${matchId}/result`, normalizePayload(data)).then((res) => res.data);
 }
@@ -42,7 +46,11 @@ export function getBracket(tournamentId: number | string) {
 }
 
 export function generateSemiFinals(tournamentId: number | string, data: Record<string, unknown>) {
-  return apiClient.post(`/brackets/tournaments/${tournamentId}/semi-finals`, normalizePayload(data)).then((res) => res.data);
+  return apiClient.post<Match[]>(`/brackets/tournaments/${tournamentId}/semi-finals`, normalizePayload(data)).then((res) => res.data);
+}
+
+export function generateFinal(tournamentId: number | string, data: Record<string, unknown>) {
+  return apiClient.post<Match>(`/brackets/tournaments/${tournamentId}/final`, normalizePayload(data)).then((res) => res.data);
 }
 
 function normalizePayload(data: Record<string, unknown>) {
@@ -52,7 +60,11 @@ function normalizePayload(data: Record<string, unknown>) {
       if (key === 'roles' && typeof value === 'string') {
         return [key, value.split(',').map((role) => role.trim()).filter(Boolean)];
       }
-      if (key.endsWith('Id') || ['capacity', 'shirtNumber', 'minute', 'orderNo', 'homeScore', 'awayScore'].includes(key)) {
+      if (
+        key.endsWith('Id') ||
+        /Id\d+$/.test(key) ||
+        ['capacity', 'shirtNumber', 'minute', 'orderNo', 'homeScore', 'awayScore'].includes(key)
+      ) {
         return [key, value === null ? null : Number(value)];
       }
       return [key, value];

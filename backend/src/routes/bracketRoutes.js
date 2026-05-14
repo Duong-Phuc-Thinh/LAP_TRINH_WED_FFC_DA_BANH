@@ -11,6 +11,11 @@ router.post(
   authorizeRoles(ROLES.ADMIN, ROLES.ORGANIZER),
   bracketController.generateSemiFinals
 );
+router.post(
+  '/tournaments/:tournamentId/final',
+  authenticate,
+  authorizeRoles(ROLES.ADMIN, ROLES.ORGANIZER),
+  bracketController.generateFinal
+);
 
 module.exports = router;
-

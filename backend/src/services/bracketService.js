@@ -1,5 +1,12 @@
-const { Match, Standing, Group, Team } = require('../models');
+const { Match, Standing, Group, Team, Stadium } = require('../models');
 const httpError = require('../utils/httpError');
+
+const knockoutInclude = [
+  { model: Team, as: 'homeTeam', attributes: ['id', 'name', 'shortName'] },
+  { model: Team, as: 'awayTeam', attributes: ['id', 'name', 'shortName'] },
+  { model: Team, as: 'winnerTeam', attributes: ['id', 'name', 'shortName'] },
+  { model: Stadium, as: 'stadium', attributes: ['id', 'name', 'city'] }
+];
 
 async function generateSemiFinals(tournamentId, data) {
   const groups = await Group.findAll({ where: { tournamentId }, order: [['orderNo', 'ASC']] });
@@ -42,10 +49,7 @@ async function generateSemiFinals(tournamentId, data) {
 
   return Match.findAll({
     where: { id: [match1.id, match2.id] },
-    include: [
-      { model: Team, as: 'homeTeam', attributes: ['id', 'name', 'shortName'] },
-      { model: Team, as: 'awayTeam', attributes: ['id', 'name', 'shortName'] }
-    ]
+    include: knockoutInclude
   });
 }
 
@@ -58,14 +62,48 @@ async function upsertSemiFinal(existingMatch, data) {
   return Match.create(data);
 }
 
+async function generateFinal(tournamentId, data) {
+  const matchDate = new Date(data.matchDate);
+  if (Number.isNaN(matchDate.getTime())) throw httpError(400, 'Final matchDate is required');
+
+  const semiFinals = await Match.findAll({
+    where: { tournamentId, stage: 'KNOCKOUT', round: 'SEMI_FINAL', status: 'FINISHED' },
+    order: [['matchDate', 'ASC'], ['id', 'ASC']],
+    limit: 2
+  });
+
+  if (semiFinals.length < 2) {
+    throw httpError(400, 'Two finished semifinals are required before generating the final');
+  }
+
+  if (!semiFinals[0].winnerTeamId || !semiFinals[1].winnerTeamId) {
+    throw httpError(400, 'Both semifinals must have winners');
+  }
+
+  const finalData = {
+    tournamentId,
+    stage: 'KNOCKOUT',
+    round: 'FINAL',
+    homeTeamId: semiFinals[0].winnerTeamId,
+    awayTeamId: semiFinals[1].winnerTeamId,
+    stadiumId: data.stadiumId || null,
+    matchDate: data.matchDate,
+    status: 'SCHEDULED',
+    notes: 'Winner semifinal 1 vs winner semifinal 2'
+  };
+
+  const existingFinal = await Match.findOne({
+    where: { tournamentId, stage: 'KNOCKOUT', round: 'FINAL' }
+  });
+
+  const final = existingFinal ? await existingFinal.update(finalData) : await Match.create(finalData);
+  return Match.findByPk(final.id, { include: knockoutInclude });
+}
+
 async function listKnockout(tournamentId) {
   return Match.findAll({
     where: { tournamentId, stage: 'KNOCKOUT' },
-    include: [
-      { model: Team, as: 'homeTeam', attributes: ['id', 'name', 'shortName'] },
-      { model: Team, as: 'awayTeam', attributes: ['id', 'name', 'shortName'] },
-      { model: Team, as: 'winnerTeam', attributes: ['id', 'name', 'shortName'] }
-    ],
+    include: knockoutInclude,
     order: [['matchDate', 'ASC']]
   });
 }
@@ -78,4 +116,4 @@ function topTeams(tournamentId, groupId) {
   });
 }
 
-module.exports = { generateSemiFinals, listKnockout };
+module.exports = { generateSemiFinals, generateFinal, listKnockout };

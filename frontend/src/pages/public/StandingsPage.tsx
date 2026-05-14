@@ -1,21 +1,42 @@
 import { FormEvent, useEffect, useState } from 'react';
 import FeedbackState from '../../components/FeedbackState';
-import { getStandings } from '../../services/resourceApi';
-import type { StandingRow } from '../../types';
+import { getStandings, listResource } from '../../services/resourceApi';
+import type { StandingRow, Tournament } from '../../types';
 import '../../styles/pages/public/StandingsPage.css';
 
 function StandingsPage() {
-  const [tournamentId, setTournamentId] = useState('1');
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [tournamentId, setTournamentId] = useState('');
   const [rows, setRows] = useState<StandingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    load();
+    boot();
   }, []);
+
+  async function boot() {
+    setLoading(true);
+    setError('');
+    try {
+      const tournamentRows = await listResource<Tournament>('tournaments');
+      const activeTournament =
+        tournamentRows.find((tournament) => ['ONGOING', 'OPEN'].includes(tournament.status)) || tournamentRows[0];
+      setTournaments(tournamentRows);
+      if (activeTournament) {
+        setTournamentId(String(activeTournament.id));
+        setRows(await getStandings(activeTournament.id));
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Cannot load standings.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function load(event?: FormEvent) {
     event?.preventDefault();
+    if (!tournamentId) return;
     setLoading(true);
     setError('');
     try {
@@ -35,7 +56,13 @@ function StandingsPage() {
           <h1>Group Standings</h1>
         </div>
         <form className="inline-form" onSubmit={load}>
-          <input value={tournamentId} onChange={(event) => setTournamentId(event.target.value)} />
+          <select value={tournamentId} onChange={(event) => setTournamentId(event.target.value)}>
+            {tournaments.map((tournament) => (
+              <option key={tournament.id} value={tournament.id}>
+                {tournament.name} {tournament.season}
+              </option>
+            ))}
+          </select>
           <button type="submit" disabled={loading}>
             Load
           </button>

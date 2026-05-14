@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import FeedbackState from '../../components/FeedbackState';
-import { listResource } from '../../services/resourceApi';
+import { listPublicNews } from '../../services/resourceApi';
 import type { NewsItem } from '../../types';
 import '../../styles/pages/public/NewsPage.css';
 
@@ -12,7 +12,7 @@ function NewsPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    listResource<NewsItem>('news')
+    listPublicNews()
       .then(setNews)
       .catch((err: any) => setError(err.response?.data?.message || 'Cannot load news.'))
       .finally(() => setLoading(false));

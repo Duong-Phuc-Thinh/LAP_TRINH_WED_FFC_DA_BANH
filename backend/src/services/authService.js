@@ -5,7 +5,7 @@ const { signToken } = require('../utils/jwt');
 const httpError = require('../utils/httpError');
 
 async function serializeUser(user) {
-  const roles = user.roles ? user.roles.map((role) => role.name) : [];
+  const roles = user.roles ? user.roles.map((role) => (typeof role === 'string' ? role : role.name)) : [];
   return {
     id: user.id,
     fullName: user.fullName,
@@ -17,6 +17,8 @@ async function serializeUser(user) {
 }
 
 async function register(data) {
+  validateRegister(data);
+
   const existed = await User.findOne({ where: { email: data.email } });
   if (existed) throw httpError(409, 'Email already exists');
 
@@ -32,11 +34,13 @@ async function register(data) {
 
   await user.addRole(role);
 
-  const userWithRoles = await getProfile(user.id);
+  const userWithRoles = await getProfileModel(user.id);
   return { token: signToken(user), user: await serializeUser(userWithRoles) };
 }
 
 async function login(email, password) {
+  if (!email || !password) throw httpError(400, 'Email and password are required');
+
   const user = await User.findOne({
     where: { email },
     include: [{ model: Role, as: 'roles', through: { attributes: [] } }]
@@ -51,12 +55,31 @@ async function login(email, password) {
   return { token: signToken(user), user: await serializeUser(user) };
 }
 
-function getProfile(id) {
+async function getProfile(id) {
+  const user = await getProfileModel(id);
+  if (!user) throw httpError(404, 'User not found');
+  return serializeUser(user);
+}
+
+function getProfileModel(id) {
   return User.findByPk(id, {
     attributes: { exclude: ['passwordHash'] },
     include: [{ model: Role, as: 'roles', attributes: ['id', 'name'], through: { attributes: [] } }]
   });
 }
 
-module.exports = { register, login, getProfile };
+function validateRegister(data) {
+  if (!data.fullName || !data.email || !data.password) {
+    throw httpError(400, 'Full name, email and password are required');
+  }
 
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(data.email))) {
+    throw httpError(400, 'Email is invalid');
+  }
+
+  if (String(data.password).length < 6) {
+    throw httpError(400, 'Password must be at least 6 characters');
+  }
+}
+
+module.exports = { register, login, getProfile };

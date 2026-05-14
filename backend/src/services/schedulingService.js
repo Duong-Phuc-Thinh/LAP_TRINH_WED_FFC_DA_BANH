@@ -5,6 +5,7 @@ const httpError = require('../utils/httpError');
 const matchInclude = [
   { model: Team, as: 'homeTeam', attributes: ['id', 'name', 'shortName'] },
   { model: Team, as: 'awayTeam', attributes: ['id', 'name', 'shortName'] },
+  { model: Team, as: 'winnerTeam', attributes: ['id', 'name', 'shortName'] },
   { model: Stadium, as: 'stadium', attributes: ['id', 'name', 'city'] },
   { model: Tournament, as: 'tournament', attributes: ['id', 'name', 'season'] },
   { model: Group, as: 'group', attributes: ['id', 'name'] },
@@ -76,4 +77,3 @@ async function validateSchedule(data, ignoreMatchId) {
 }
 
 module.exports = { list, getById, create, update, remove, matchInclude };
-

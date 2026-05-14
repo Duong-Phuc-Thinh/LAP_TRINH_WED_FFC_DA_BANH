@@ -8,6 +8,9 @@ module.exports = {
 
   generateSemiFinals: asyncHandler(async (req, res) => {
     res.status(201).json(await bracketService.generateSemiFinals(req.params.tournamentId, req.body));
+  }),
+
+  generateFinal: asyncHandler(async (req, res) => {
+    res.status(201).json(await bracketService.generateFinal(req.params.tournamentId, req.body));
   })
 };
-

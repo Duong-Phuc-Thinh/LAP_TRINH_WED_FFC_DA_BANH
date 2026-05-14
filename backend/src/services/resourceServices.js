@@ -49,9 +49,38 @@ const newsService = new CrudService(newsRepository, {
 
 const originalNewsCreate = newsService.create.bind(newsService);
 newsService.create = (data) => {
-  const slug = data.slug || `${slugify(data.title)}-${Date.now()}`;
-  return originalNewsCreate({ ...data, slug });
+  return originalNewsCreate(prepareNewsPayload(data));
 };
+
+const originalNewsUpdate = newsService.update.bind(newsService);
+newsService.update = (id, data) => {
+  return originalNewsUpdate(id, prepareNewsPayload(data, { isUpdate: true }));
+};
+
+newsService.listPublished = () => {
+  return newsRepository.findAll({
+    include: [{ model: User, as: 'author', attributes: ['id', 'fullName'] }],
+    where: { status: 'PUBLISHED' },
+    order: [
+      ['publishedAt', 'DESC'],
+      ['createdAt', 'DESC']
+    ]
+  });
+};
+
+function prepareNewsPayload(data, options = {}) {
+  const payload = { ...data };
+
+  if (!options.isUpdate || data.slug) {
+    payload.slug = data.slug || `${slugify(data.title)}-${Date.now()}`;
+  }
+
+  if (payload.status === 'PUBLISHED' && !payload.publishedAt) {
+    payload.publishedAt = new Date();
+  }
+
+  return payload;
+}
 
 module.exports = {
   tournamentService,
@@ -62,4 +91,3 @@ module.exports = {
   newsService,
   notificationService
 };
-

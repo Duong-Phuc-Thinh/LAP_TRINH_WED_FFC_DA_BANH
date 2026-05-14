@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import FeedbackState from '../../components/FeedbackState';
+import { useMatchRealtime } from '../../hooks/useMatchRealtime';
 import { listResource } from '../../services/resourceApi';
 import type { Match } from '../../types';
 import '../../styles/pages/public/SchedulePage.css';
@@ -18,6 +19,12 @@ function SchedulePage() {
       .catch((err: any) => setError(err.response?.data?.message || 'Cannot load match schedule.'))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleMatchUpdated = useCallback((updatedMatch: Match) => {
+    setMatches((current) => current.map((match) => (match.id === updatedMatch.id ? updatedMatch : match)));
+  }, []);
+
+  useMatchRealtime(handleMatchUpdated);
 
   const filteredMatches = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();

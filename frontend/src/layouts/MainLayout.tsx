@@ -4,7 +4,9 @@ import { useAuth } from '../contexts/AuthContext';
 import '../styles/layouts/MainLayout.css';
 
 function MainLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, hasRole } = useAuth();
+  const canUseDashboard = hasRole(['ADMIN', 'ORGANIZER', 'REFEREE']);
+  const dashboardPath = hasRole(['REFEREE']) && !hasRole(['ADMIN', 'ORGANIZER']) ? '/dashboard/results' : '/dashboard';
 
   return (
     <div className="app-shell">
@@ -14,10 +16,11 @@ function MainLayout() {
         </Link>
         <nav>
           <NavLink to="/matches">Schedule</NavLink>
+          <NavLink to="/results">Results</NavLink>
           <NavLink to="/teams">Teams</NavLink>
           <NavLink to="/standings">Standings</NavLink>
           <NavLink to="/news">News</NavLink>
-          {user && <NavLink to="/dashboard">Dashboard</NavLink>}
+          {canUseDashboard && <NavLink to={dashboardPath}>Dashboard</NavLink>}
         </nav>
         <div className="topbar-actions">
           {user ? (

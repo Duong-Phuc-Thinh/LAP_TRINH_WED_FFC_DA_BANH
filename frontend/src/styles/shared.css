@@ -258,6 +258,37 @@ tbody tr:hover {
   color: #fecaca;
 }
 
+.lift-card {
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.lift-card:hover {
+  border-color: rgba(34, 197, 94, 0.42);
+  box-shadow: var(--shadow-lift), 0 0 34px rgba(34, 197, 94, 0.14);
+  transform: translateY(-5px);
+}
+
+.fade-section {
+  animation: fadeUp 560ms ease both;
+}
+
+.shine-link {
+  overflow: hidden;
+  position: relative;
+}
+
+.shine-link::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+  content: "";
+  inset: 0;
+  position: absolute;
+  transform: translateX(-120%);
+}
+
+.shine-link:hover::before {
+  animation: shimmer 920ms ease;
+}
+
 @media (max-width: 900px) {
   .section-heading,
   .inline-form {

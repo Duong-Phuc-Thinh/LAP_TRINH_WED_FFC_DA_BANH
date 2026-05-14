@@ -8,8 +8,8 @@ interface AuthContextValue {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: { fullName: string; email: string; password: string; phone?: string }) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (data: { fullName: string; email: string; password: string; phone?: string }) => Promise<User>;
   logout: () => void;
   hasRole: (roles?: Role[]) => boolean;
 }
@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!token) return;
 
     meApi()
-      .then(setUser)
+      .then((profile) => setUser(normalizeUser(profile)))
       .catch(() => {
         localStorage.removeItem(TOKEN_KEY);
         setToken(null);
@@ -34,17 +34,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   async function saveAuth(auth: AuthResponse) {
+    const normalizedUser = normalizeUser(auth.user);
     localStorage.setItem(TOKEN_KEY, auth.token);
     setToken(auth.token);
-    setUser(auth.user);
+    setUser(normalizedUser);
+    return normalizedUser;
   }
 
   async function login(email: string, password: string) {
-    await saveAuth(await loginApi(email, password));
+    return saveAuth(await loginApi(email, password));
   }
 
   async function register(data: { fullName: string; email: string; password: string; phone?: string }) {
-    await saveAuth(await registerApi(data));
+    return saveAuth(await registerApi(data));
   }
 
   function logout() {
@@ -66,9 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+function normalizeUser(user: User): User {
+  return {
+    ...user,
+    roles: (user.roles || []).map((role: any) => (typeof role === 'string' ? role : role.name)).filter(Boolean)
+  };
+}
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used inside AuthProvider');
   return context;
 }
-

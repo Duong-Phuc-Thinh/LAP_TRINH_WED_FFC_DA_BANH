@@ -22,13 +22,9 @@ function TeamDetailPage() {
       return;
     }
 
-    Promise.all([
-      getResource<Team>('teams', teamId),
-      listResource<Player>('players'),
-      listResource<Match>('matches'),
-      getStandings(1)
-    ])
-      .then(([teamRow, playerRows, matchRows, standingRows]) => {
+    Promise.all([getResource<Team>('teams', teamId), listResource<Player>('players'), listResource<Match>('matches')])
+      .then(async ([teamRow, playerRows, matchRows]) => {
+        const standingRows = teamRow.tournamentId ? await getStandings(teamRow.tournamentId) : [];
         setTeam(teamRow);
         setPlayers(playerRows.filter((player) => player.teamId === teamId));
         setMatches(matchRows.filter((match) => match.homeTeam?.id === teamId || match.awayTeam?.id === teamId));
