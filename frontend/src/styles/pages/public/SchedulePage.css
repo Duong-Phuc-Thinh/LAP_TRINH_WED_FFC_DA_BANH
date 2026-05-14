@@ -1,0 +1,45 @@
+.schedule-page {
+  animation: fadeUp 520ms ease both;
+}
+
+.schedule-page table {
+  min-width: 860px;
+}
+
+.schedule-match-cell {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  min-width: 300px;
+}
+
+.schedule-team {
+  align-items: center;
+  display: flex;
+  gap: 9px;
+}
+
+.schedule-team.away {
+  justify-content: flex-end;
+}
+
+.schedule-score {
+  background: rgba(2, 6, 23, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  font-weight: 1000;
+  min-width: 58px;
+  padding: 6px 8px;
+  text-align: center;
+}
+
+.schedule-date {
+  color: var(--text-secondary);
+  font-weight: 800;
+}
+
+.schedule-stadium {
+  color: var(--text-muted);
+}

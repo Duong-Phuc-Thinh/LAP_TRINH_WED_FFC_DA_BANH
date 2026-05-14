@@ -1,0 +1,23 @@
+@keyframes stadiumGlow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate3d(-4%, -2%, 0) scale(1);
+  }
+
+  50% {
+    opacity: 0.78;
+    transform: translate3d(4%, 2%, 0) scale(1.08);
+  }
+}
+
+@keyframes borderGlow {
+  0%,
+  100% {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  50% {
+    border-color: rgba(34, 197, 94, 0.5);
+  }
+}

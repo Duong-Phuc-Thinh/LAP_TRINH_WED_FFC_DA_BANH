@@ -1,0 +1,42 @@
+.auth-page {
+  display: grid;
+  min-height: calc(100vh - 130px);
+  place-items: center;
+}
+
+.auth-card {
+  animation: fadeUp 520ms ease both;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(34, 197, 94, 0.2), transparent 36%),
+    rgba(7, 17, 31, 0.82);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lift);
+  display: grid;
+  gap: 14px;
+  max-width: 440px;
+  padding: 26px;
+  width: 100%;
+  backdrop-filter: blur(18px);
+}
+
+.auth-card h1 {
+  margin: 0;
+}
+
+.auth-card label {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-card label span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.auth-card a {
+  color: #bbf7d0;
+  font-weight: 800;
+}

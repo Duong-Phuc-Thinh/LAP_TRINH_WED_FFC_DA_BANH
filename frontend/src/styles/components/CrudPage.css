@@ -1,0 +1,44 @@
+.crud-form {
+  background: rgba(2, 6, 23, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 14px;
+}
+
+.crud-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.crud-form span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.crud-form textarea,
+.form-actions,
+.form-error,
+.success-message,
+.toast-message {
+  grid-column: 1 / -1;
+}
+
+.compact-form {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.crud-form + .table-wrap {
+  margin-top: 2px;
+}
+
+@media (max-width: 900px) {
+  .crud-form,
+  .compact-form {
+    grid-template-columns: 1fr;
+  }
+}
